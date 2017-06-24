@@ -1,0 +1,17 @@
+{
+  "name": "ethsocial",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "ethereumjs-abi": "^0.6.4",
+    "vue.js": "^0.3.2"
+  },
+  "devDependencies": {},
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "browser": {
+    "vue": "vue/dist/vue.common.js"
+  }
+}
