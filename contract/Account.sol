@@ -1,5 +1,21 @@
 pragma solidity ^0.4.10;
 
+contract AccountRegistry {
+	address[] accounts;
+
+	function getAccounts() constant returns (uint) {
+		return accounts.length;
+	}
+
+	function getAccount(uint id) constant returns (address) {
+		return accounts[id];
+	}
+
+	function pushAccount() {
+		accounts.push(msg.sender);
+	}
+}
+
 contract Account {
     struct Comment {
         address owner;
@@ -25,15 +41,16 @@ contract Account {
         _;
     }
 
-    function Account() {
+    function Account(address registry) {
         owner = msg.sender;
+        AccountRegistry(registry).pushAccount();
     }
 
     function setName(string _name) isOwner {
         name = _name;
     }
 
-    function getName() returns (string) {
+    function getName() constant returns (string) {
         return name;
     }
 
@@ -41,7 +58,7 @@ contract Account {
         bio = _bio;
     }
 
-    function getBio() returns (string) {
+    function getBio() constant returns (string) {
         return bio;
     }
 
@@ -49,11 +66,11 @@ contract Account {
         posts[posts.length++].content = content;
     }
 
-    function getPosts() returns (uint) {
+    function getPosts() constant returns (uint) {
         return posts.length;
     }
 
-    function getPost(uint id) returns (string, bool, uint) {
+    function getPost(uint id) constant returns (string, bool, uint) {
         var post = posts[id];
 
         return (post.content, post.edited, post.comments.length);
@@ -85,7 +102,7 @@ contract Account {
         comment.content = content;
     }
 
-    function getComment(uint postId, uint commentId) returns (address, string) {
+    function getComment(uint postId, uint commentId) constant returns (address, string) {
         var comment = posts[postId].comments[commentId];
 
         return (comment.owner, comment.content);
@@ -99,7 +116,7 @@ contract Account {
         Account(user)._editComment(postId, commentId, content);
     }
 
-    function getFollows() returns (uint) {
+    function getFollows() constant returns (uint) {
         return follows.length;
     }
 

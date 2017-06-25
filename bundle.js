@@ -6509,8 +6509,10 @@ module.exports = class Ethane {
 					const args = {
 						from: coinbase,
 						to: this.address,
-						data: "0x" + id + abi.rawEncode(inputTypes, arguments).toString("hex")
+						data: "0x" + id + abi.rawEncode(inputTypes, [...arguments]).toString("hex")
 					};
+
+					console.log(inputTypes, [...arguments]);
 
 					if(method.constant == true) {
 						return this.rpc.eth_call(args, "latest");
@@ -6518,8 +6520,10 @@ module.exports = class Ethane {
 						return this.rpc.eth_sendTransaction(args);
 					}
 				}).then(res => {
+					console.log(outputTypes);
+					console.log(res);
 					const output = abi.rawDecode(outputTypes, Buffer.from(res.slice(2), "hex"));
-
+					console.log(output);
 					return output.length <= 1 ? output[0] : output;
 				});
 			};
@@ -19851,49 +19855,88 @@ module.exports = (url, body) => {
 };
 
 },{}],100:[function(require,module,exports){
-const Ethane = require("../ethane");
 const Vue = require("vue");
+const User = require("./lib/User");
 
-const ethane = new Ethane("http://localhost:8545");
+const self = window.user = new User("0x4780e332579dd6c885fbd66ae8166b103b016ef7");
+let user;
 
-const Account = ethane.contract(
+const app = window.app = new Vue({
+	el: "#app",
+	data: {
+		newPost: "",
+		comments: {},
+		self: {
+			name: "",
+			bio: "",
+			posts: []
+		},
+		user: {
+			name: "",
+			bio: "",
+			posts: []
+		},
+		accounts: []
+	},
+	methods: {
+		pushPost() {
+			self._account.pushPost(this.newPost);
+			this.newPost = "";
+		},
+		pushComment(postId) {
+			self._account.pushComment(user.address, postId, this.comments[postId]);
+			this.comments[postId] = "";
+		},
+		changeUser(address) {
+			user = new User(address);
+			autoUpdate();
+		}
+	}
+});
+
+const autoUpdate = () => {
+	self.load().then(() => {
+		for(let key in self) {
+			app.self[key] = self[key];
+		}
+	});
+
+	if(user) {
+		user.load().then(() => {
+			for(let key in user) {
+				app.user[key] = user[key];
+			}
+		});
+	}
+};
+
+autoUpdate();
+setInterval(autoUpdate, 2000);
+
+},{"./lib/User":102,"vue":104}],101:[function(require,module,exports){
+const ethane = require("./ethane");
+
+const Account = module.exports = ethane.contract(
 	[{"constant":false,"inputs":[{"name":"account","type":"address"}],"name":"pushFollow","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getName","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"content","type":"string"}],"name":"pushPost","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"user","type":"address"},{"name":"postId","type":"uint256"},{"name":"commentId","type":"uint256"},{"name":"content","type":"string"}],"name":"editComment","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"id","type":"uint256"}],"name":"getPost","outputs":[{"name":"","type":"string"},{"name":"","type":"bool"},{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getPosts","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"postId","type":"uint256"},{"name":"commentId","type":"uint256"},{"name":"content","type":"string"}],"name":"_editComment","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"postId","type":"uint256"},{"name":"commentId","type":"uint256"}],"name":"getComment","outputs":[{"name":"","type":"address"},{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"}],"name":"deleteFollow","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"user","type":"address"},{"name":"postId","type":"uint256"},{"name":"content","type":"string"}],"name":"pushComment","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getFollows","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_name","type":"string"}],"name":"setName","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"content","type":"string"}],"name":"_pushComment","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"getBio","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"id","type":"uint256"},{"name":"content","type":"string"}],"name":"editPost","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_bio","type":"string"}],"name":"setBio","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"}]
 );
 
-class User {
+},{"./ethane":103}],102:[function(require,module,exports){
+const Account = require("./Account");
+
+module.exports = class User {
 	constructor(address) {
 		this._account = new Account(address);
 		this.address = address;
 	}
 
-	update() {
+	loadProfile() {
 		return Promise.all([
 			this._account.getName(),
-			this._account.getBio(),
-			this._account.getPosts(),
-			this._account.getFollows()
+			this._account.getBio()
 		]).then(res => {
-			const [ name, bio, totalPosts, totalFollows ] = res;
-
+			const [ name, bio ] = res;
 			this.name = name;
 			this.bio = bio;
-
-			const posts = [];
-
-			for(let i = 0; i < totalPosts; i++) {
-				posts.push(this.getPost(i));
-			}
-
-			const follows = [];
-
-			for(let i = 0; i < totalFollows; i++) {
-				follows.push(this._account.getFollow(id));
-			}
-
-			return Promise.all([
-				Promise.all(posts).then(p => this.posts = p.reverse()),
-				Promise.all(follows).then(f => this.follows = f)
-			]);
 		});
 	}
 
@@ -19915,64 +19958,46 @@ class User {
 			return Promise.all(comments).then(c => post.comments = c).then(() => post);
 		});
 	}
-}
 
-const self = window.user = new User("0x4780e332579dd6c885fbd66ae8166b103b016ef7");
+	loadPosts() {
+		return this._account.getPosts().then(totalPosts => {
+			const posts = [];
 
-let user;
-
-const app = window.app = new Vue({
-	el: "#app",
-	data: {
-		newPost: "",
-		comments: {},
-		self: {
-			name: "",
-			bio: "",
-			posts: []
-		},
-		user: {
-			name: "",
-			bio: "",
-			posts: []
-		}
-	},
-	methods: {
-		pushPost() {
-			self._account.pushPost(this.newPost);
-			this.newPost = "";
-		},
-		pushComment(postId) {
-			self._account.pushComment(user.address, postId, this.comments[postId]);
-			this.comments[postId] = "";
-		},
-		changeUser(address) {
-			user = new User(address);
-			autoUpdate();
-		}
-	}
-});
-
-const autoUpdate = () => {
-	self.update().then(() => {
-		for(let key in self) {
-			app.self[key] = self[key];
-		}
-	});
-
-	if(user) {
-		user.update().then(() => {
-			for(let key in user) {
-				app.user[key] = user[key];
+			for(let i = 0; i < totalPosts; i++) {
+				posts.push(this.getPost(i));
 			}
+
+			return Promise.all(posts).then(p => this.posts = p.reverse());
 		});
 	}
-};
 
-autoUpdate();
-setInterval(autoUpdate, 2000);
+	loadFollows() {
+		return this._account.getFollows().then(totalFollows => {
+			const follows = [];
 
-},{"../ethane":34,"vue":101}],101:[function(require,module,exports){
+			for(let i = 0; i < totalFollows; i++) {
+				follows.push(this._account.getFollow(id));
+			}
+
+			return Promise.all(follows).then(f => this.follows = f);
+		});
+	}
+
+	load() {
+		return Promise.all([
+			this.loadProfile(),
+			this.loadPosts(),
+			this.loadFollows()
+		]);
+	}
+}
+
+},{"./Account":101}],103:[function(require,module,exports){
+const Ethane = require("../../ethane");
+const ethane = new Ethane("http://localhost:8545");
+module.exports = ethane;
+
+},{"../../ethane":34}],104:[function(require,module,exports){
 (function (process,global){
 /*!
  * Vue.js v2.3.4
