@@ -3,50 +3,20 @@
 	<head>
 		<title>ethsocial</title>
 
-		<link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.99.0/css/materialize.min.css" rel="stylesheet">
+		<link href="bundle.css" rel="stylesheet">
 
 	</head>
 	<body>
 
+		<nav>
+			<div class="container">
+				<h3>ethsocial</h3>
+			</div>
+		</nav>
+
 		<div class="container">
 			<div id="app">
-				<p>Logged in as <a v-on:click="changeUser(self.address)">{{self.name}} ({{self.address}})</a></p>
-
-				<h1>{{user.name}}</h1>
-				<h3>{{user.bio}}</h3>
-
-				<ul class="posts">
-					<li v-if="self.address == user.address">
-						<div class="row">
-							<div class="card">
-								<div class="card-content">
-									<input placeholder="What's on your mind?" v-model="newPost" v-on:keyup.enter="pushPost">
-								</div>
-							</div>
-						</div>
-					</li>
-
-					<li v-for="post in user.posts">
-						<div class="row">
-							<div class="card">
-								<div class="card-content">
-									<p>{{post.content}}</p>
-
-									<div class="collection">
-										<div class="collection-item" v-for="comment in post.comments">
-											<b>{{comment[0]}}</b> {{comment[1]}}
-										</div>
-
-										<div class="row collection-item">
-											<input placeholder="What do you think?" v-model="comments[post.id]" v-on:keyup.enter="pushComment(post.id)">
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-
-					</li>
-				</ul>
+				
 			</div>
 		</div>
 
