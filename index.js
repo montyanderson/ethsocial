@@ -6,7 +6,7 @@ class Dashboard extends React.Component {
 	constructor(...args) {
 		super(...args);
 
-		const user = new User("0x4780e332579dd6c885fbd66ae8166b103b016ef7");
+		const user = new User(localStorage.address);
 		this.state = {
 			user,
 			editedName: "",
