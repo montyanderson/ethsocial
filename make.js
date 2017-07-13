@@ -8,12 +8,7 @@ less.renderAsync = util.promisify(less.render);
 
 earthly.task("browserify", [ "index.js", "lib/*.js" ], async () => {
 	const bundle = await earthly.stream(
-		browserify("index.js")
-			.transform("babelify", {
-				plugins: [ "transform-es2015-modules-commonjs" ],
-				presets: [ "react" ]
-			})
-			.bundle()
+		browserify("index.js").bundle()
 	);
 
 	await earthly.writeFile(__dirname + "/bundle.js", bundle);

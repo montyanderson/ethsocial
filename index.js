@@ -1,95 +1,57 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import User from "./lib/User";
+const Vue = require("vue");
+const User = require("./lib/User");
 
-class Dashboard extends React.Component {
-	constructor(...args) {
-		super(...args);
+const self = window.user = new User(localStorage.address);
+let user;
 
-		const user = new User(localStorage.address);
-		this.state = {
-			user,
-			editedName: "",
-			editedBio: ""
-		};
-
-		[
-			"editedNameChange",
-			"editedNameKeyPress",
-			"editedBioChange",
-			"editedBioKeyPress"
-		].forEach(func => {
-			this[func] = this[func].bind(this);
-		});
-
-		this.updateProfile();
-	}
-
-	editedNameChange(event) {
-		this.setState({
-			editedName: event.target.value
-		});
-	}
-
-	async editedNameKeyPress(event) {
-		if(event.key == "Enter") {
-			console.log("Up");
-			console.log(this.state.user.setName);
-			await this.state.user.setName(this.state.editedName);
-			await this.updateProfile();
+const app = window.app = new Vue({
+	el: "#app",
+	data: {
+		newPost: "",
+		comments: {},
+		self: {
+			name: "",
+			bio: "",
+			posts: []
+		},
+		user: {
+			name: "",
+			bio: "",
+			posts: []
+		},
+		accounts: []
+	},
+	methods: {
+		pushPost() {
+			self._account.pushPost(this.newPost);
+			this.newPost = "";
+		},
+		pushComment(postId) {
+			self._account.pushComment(user.address, postId, this.comments[postId]);
+			this.comments[postId] = "";
+		},
+		changeUser(address) {
+			user = new User(address);
+			autoUpdate();
 		}
 	}
+});
 
-	editedBioChange(event) {
-		this.setState({
-			editedBio: event.target.value
+const autoUpdate = () => {
+	self.load().then(() => {
+		for(let key in self) {
+			app.self[key] = self[key];
+		}
+	});
+
+	if(user) {
+		user.load().then(() => {
+			for(let key in user) {
+				app.user[key] = user[key];
+			}
 		});
 	}
+};
 
-	async editedBioKeyPress(event) {
-		if(event.key == "Enter") {
-			await this.state.user.setBio(this.state.editedBio);
-			await this.updateProfile();
-		}
-	}
-
-	async updateProfile() {
-		await this.state.user.load();
-
-		const newState = {
-			user: this.state.user,
-			editedName: this.state.user.name,
-			editedBio: this.state.user.bio
-		};
-
-		this.setState(() => newState);
-	}
-
-	render() {
-		return <div className="dashboard">
-			<input
-				onKeyPress={this.editedNameKeyPress}
-				onChange={this.editedNameChange}
-				value={this.state.editedName}
-			/>
-
-			<input
-				onKeyPress={this.editedBioKeyPress}
-				onChange={this.editedBioChange}
-				value={this.state.editedBio}
-			/>
-		</div>;
-	}
-}
-
-class EthSocial extends React.Component {
-	constructor(...args) {
-		super(...args);
-	}
-
-	render() {
-		return <Dashboard />
-	}
-}
-
-ReactDOM.render(<EthSocial />, document.querySelector("#app"));
+autoUpdate();
+setInterval(autoUpdate, 2000);
