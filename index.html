@@ -5,6 +5,8 @@
 		<title>ethsocial</title>
 
 		<meta charset="utf-8">
+
+		<link href="https://fonts.googleapis.com/css?family=Maven+Pro" rel="stylesheet">
 		<link href="bundle.css" rel="stylesheet">
 
 	</head>
@@ -23,39 +25,56 @@
 					<input v-model="address" placeholder="Enter a friend's account" v-on:keyup.enter="changeProfile(address)">
 
 					<div class="panel">
-						<a href="#" v-on:click="changeProfile(userId)">My Account</a>
+						<h3><a href="#" v-on:click="changeProfile(userId)">My Account</a></h3>
 					</div>
 
 					<div id="profile">
-						<div>
-						<span v-if="profile.userId == userId">
-							<input class="name" v-model="profile.name" v-on:keyup.enter="setName(profile.name)" placeholder="What do you want to be called?">
-							<input class="bio" v-model="profile.bio" v-on:keyup.enter="setBio(profile.bio)" placeholder="What would you say about yourself?">
-						</span>
-						<span v-else>
-							<h1>{{profile.name}}</h1>
-							<h2>{{profile.bio}}</h2>
-						</span>
-					</div>
+						<section class="info">
+							<span v-if="profile.userId == userId">
+								<input class="name" v-model="profile.name" v-on:keyup.enter="setName(profile.name)" placeholder="What do you want to be called?">
+								<input class="bio" v-model="profile.bio" v-on:keyup.enter="setBio(profile.bio)" placeholder="What would you say about yourself?">
+							</span>
+							<span v-else>
+								<h5 class="address">
+									<a href="#" v-on:click="changeProfile(post.userId)">
+										{{profile.userId}}
+									</a>
+								</h5>
+								<h3>{{profile.name}}</h3>
+								<h4>{{profile.bio}}</h4>
+							</span>
 
-						<div class="posts">
-							<input v-if="profile.userId == userId" v-model="newPost" class="post" v-on:keyup.enter="submitPost(newPost)" placeholder="What's on your mind?">
+							<input v-if="profile.userId == userId" v-model="newPost" v-on:keyup.enter="submitPost(newPost)" placeholder="What's on your mind?">
+						</section>
+
+						<section class="posts">
+							<h3>Posts</h3>
 
 							<div class="post" v-for="post in profile.posts">
-								<h4>{{post.content}}</h4>
+								<h5 class="address">
+									<a href="#" v-on:click="changeProfile(post.userId)">
+										{{post.userId}}
+									</a>
+								</h5>
 
-								<div class="comments">
+								<h4 class="content">{{post.content}}</h4>
+
+								<section class="comments">
 									<div class="comment" v-for="comment in post.comments">
-										<h5><a href="#" v-on:click="changeProfile(comment.userId)">
-											{{comment.userId}}
-										</a> {{comment.content}}</h5>
+										<h5 class="address">
+											<a href="#" v-on:click="changeProfile(comment.userId)">
+												{{comment.userId}}
+											</a>
+										</h5>
+
+										<p class="content">{{comment.content}}</p>
 									</div>
 
 									<input class="comment" v-model="post.newComment" v-on:keyup.enter="submitComment(post.userId, post.postId, post.newComment)" placeholder="What do you think?">
-								</div>
+								</section>
 
 							</div>
-						</div>
+						</section>
 					</div>
 				</div>
 
