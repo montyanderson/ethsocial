@@ -25,7 +25,37 @@ body > nav {
 }
 
 #app {
-	
+	display: block;
+	width: 100%;
+
+	.panel {
+		float: left;
+		width: auto;
+		display: inline-block;
+		height: 100%;
+	}
+
+	input {
+		width: 100% !important;
+		margin: 0.5rem 0 .5rem 0;
+		padding: 0.5rem;
+	}
+
+	#profile {
+		float: right;
+		display: block;
+		width: 70%;
+
+		input.name {
+			font-size: 2rem;
+		}
+
+		input.bio, input.comment, input.post {
+			font-size: 1.2rem;
+		}
+	}
+
+
 }
 
 @media (min-width: 600px) {

@@ -1,21 +1,5 @@
 pragma solidity ^0.4.10;
 
-contract AccountRegistry {
-	address[] accounts;
-
-	function getAccounts() constant returns (uint) {
-		return accounts.length;
-	}
-
-	function getAccount(uint id) constant returns (address) {
-		return accounts[id];
-	}
-
-	function pushAccount() {
-		accounts.push(msg.sender);
-	}
-}
-
 contract Account {
     struct Comment {
         address owner;
@@ -41,9 +25,8 @@ contract Account {
         _;
     }
 
-    function Account(address registry) {
+    function Account() {
         owner = msg.sender;
-        AccountRegistry(registry).pushAccount();
     }
 
     function setName(string _name) isOwner {

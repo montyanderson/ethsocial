@@ -19,6 +19,34 @@ body > nav {
   margin-right: auto;
   padding: 1rem 1rem 1rem 0;
 }
+#app {
+  display: block;
+  width: 100%;
+}
+#app .panel {
+  float: left;
+  width: auto;
+  display: inline-block;
+  height: 100%;
+}
+#app input {
+  width: 100% !important;
+  margin: 0.5rem 0 .5rem 0;
+  padding: 0.5rem;
+}
+#app #profile {
+  float: right;
+  display: block;
+  width: 70%;
+}
+#app #profile input.name {
+  font-size: 2rem;
+}
+#app #profile input.bio,
+#app #profile input.comment,
+#app #profile input.post {
+  font-size: 1.2rem;
+}
 @media (min-width: 600px) {
   html {
     font-size: 0.9em;

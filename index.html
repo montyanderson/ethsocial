@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 	<head>
+
 		<title>ethsocial</title>
 
+		<meta charset="utf-8">
 		<link href="bundle.css" rel="stylesheet">
 
 	</head>
@@ -17,24 +19,46 @@
 		<div class="container">
 			<div id="app">
 
-				<div id="profile">
-					<h1>{{profile.name}}</h1>
-					<h2>{{profile.bio}}</h2>
+				<input v-model="address" placeholder="Enter a friend's account" v-on:keyup.enter="changeProfile(address)">
+
+				<div class="panel">
+					<a href="#" v-on:click="changeProfile(userId)">My Account</a>
+				</div>
+
+				<div v-if="login" id="profile">
+					<div>
+					<span v-if="profile.userId == userId">
+						<input class="name" v-model="profile.name" v-on:keyup.enter="setName(profile.name)" placeholder="What do you want to be called?">
+						<input class="bio" v-model="profile.bio" v-on:keyup.enter="setBio(profile.bio)" placeholder="What would you say about yourself?">
+					</span>
+					<span v-else>
+						<h1>{{profile.name}}</h1>
+						<h2>{{profile.bio}}</h2>
+					</span>
+				</div>
 
 					<div class="posts">
+						<input v-if="profile.userId == userId" v-model="newPost" class="post" v-on:keyup.enter="submitPost(newPost)" placeholder="What's on your mind?">
+
 						<div class="post" v-for="post in profile.posts">
 							<h4>{{post.content}}</h4>
 
 							<div class="comments">
 								<div class="comment" v-for="comment in post.comments">
-									<a href="#" v-on:click="changeProfile(comment.userId)">
+									<h5><a href="#" v-on:click="changeProfile(comment.userId)">
 										{{comment.userId}}
-									</a>
-									<h5>{{comment.content}}</h5>
+									</a> {{comment.content}}</h5>
 								</div>
+
+								<input class="comment" v-model="post.newComment" v-on:keyup.enter="submitComment(post.userId, post.postId, post.newComment)" placeholder="What do you think?">
 							</div>
+
 						</div>
 					</div>
+				</div>
+
+				<div v-else v-on:click="createAccount">
+					<a>Make an account!</a>
 				</div>
 
 			</div>
