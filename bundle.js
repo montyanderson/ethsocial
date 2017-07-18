@@ -13635,7 +13635,7 @@ const app = window.app = new Vue({
 			const profile = await User.load(userId.toString("hex"));
 
 			for(let post of profile.posts) {
-				post.newComment = "";
+				post.newComment = (app.profile.posts && app.profile.posts[profile.posts.indexOf(post)] || {}).newComment || "";
 			}
 
 			if(profile.userId == this.userId) {
