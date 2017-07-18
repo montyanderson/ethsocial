@@ -19,7 +19,7 @@
 		</nav>
 
 		<div class="container">
-			<div id="app">
+			<div id="app" style="display: none">
 
 				<div v-if="login">
 					<input v-model="address" placeholder="Enter a friend's account" v-on:keyup.enter="changeProfile(address)">
@@ -30,18 +30,50 @@
 
 					<div id="profile">
 						<section class="info">
-							<img v-bind:src="profile.pictureUrl" class="picture">
+							<img
+								v-if="!editingPicture && profile.pictureHash"
+								v-bind:src="profile.pictureUrl"
+								v-on:click="editingPicture = true"
+								class="picture"
+							>
+
+							<input
+								v-if="editingPicture || !profile.pictureHash"
+								class="picture"
+								v-model="newPicture"
+								v-on:keyup.enter="setPicture(newPicture)"
+								v-on:keyup.esc="editingPicture = false"
+								placeholder="Profile Picture IPFS Hash"
+							>
+
+							<h5 class="address">
+								<a href="#" v-on:click="changeProfile(profile.userId)" v-html="addressColors(profile.userId)">
+								</a>
+							</h5>
 
 							<span v-if="profile.userId == userId">
-								<input class="name" v-model="profile.name" v-on:keyup.enter="setName(profile.name)" placeholder="What do you want to be called?">
-								<input class="bio" v-model="profile.bio" v-on:keyup.enter="setBio(profile.bio)" placeholder="What would you say about yourself?">
-								<input class="picture" v-model="profile.pictureHash" v-on:keyup.enter="setPicture(profile.pictureHash)" placeholder="Profile Picture IPFS Hash">
+								<h3 v-if="!editingName && profile.name" v-on:click="editingName = true">{{profile.name}}</h3>
+
+								<input
+									v-if="editingName || !profile.name"
+									class="name"
+									v-model="newName"
+									v-on:keyup.enter="setName(newName)"
+									v-on:keyup.esc="editingName = false"
+									placeholder="What do you want to be called?"
+								>
+
+								<h4 v-if="!editingBio && profile.bio" v-on:click="editingBio = true">{{profile.bio}}</h4>
+								<input
+									v-if="editingBio || !profile.bio"
+									class="bio"
+									v-model="newBio"
+									v-on:keyup.enter="setBio(newBio)"
+									v-on:keyup.esc="editingBio = false"
+									placeholder="What would you say about yourself?"
+								>
 							</span>
 							<span v-else>
-								<h5 class="address">
-									<a href="#" v-on:click="changeProfile(profile.userId)" v-html="addressColors(profile.userId)">
-									</a>
-								</h5>
 								<h3>{{profile.name}}</h3>
 								<h4>{{profile.bio}}</h4>
 							</span>

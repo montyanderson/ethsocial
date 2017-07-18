@@ -13581,6 +13581,8 @@ const Account = window.account = require("./Account");
 const User = require("./User");
 const createNotification = require("./createNotification");
 
+document.querySelector("#app").style.display = "block";
+
 const app = window.app = new Vue({
 	el: "#app",
 	data: {
@@ -13588,7 +13590,12 @@ const app = window.app = new Vue({
 		login: localStorage.address ? true : false,
 		profile: {},
 		newPost: "",
+		editingName: false,
+		newName: "",
+		editingBio: false,
+		newBio: "",
 		address: "",
+		editingPicture: false,
 		newPicture: ""
 	},
 	methods: {
@@ -13606,24 +13613,34 @@ const app = window.app = new Vue({
 
 		async setName(name) {
 			await Account.at(this.userId).setName(name);
+			this.editingName = false;
 			await this.changeProfile(this.userId);
 		},
 
 		async setBio(bio) {
 			await Account.at(this.userId).setBio(bio);
+			this.editingBio = false;
 			await this.changeProfile(this.userId);
 		},
 
 		async setPicture(pictureHash) {
 			await Account.at(this.userId).setPicture(base58.decode(pictureHash));
+			this.editingPicture = false;
 			await this.changeProfile(this.userId);
 		},
 
 		async changeProfile(userId) {
+			let i;
+
 			const profile = await User.load(userId.toString("hex"));
 
 			for(let post of profile.posts) {
 				post.newComment = "";
+			}
+
+			if(profile.userId == this.userId) {
+				if(!this.newName) this.newName = profile.name;
+				if(!this.newBio) this.nameBio = profile.bio;
 			}
 
 			app.profile = profile;
