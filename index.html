@@ -30,14 +30,16 @@
 
 					<div id="profile">
 						<section class="info">
+							<img v-bind:src="profile.pictureUrl" class="picture">
+
 							<span v-if="profile.userId == userId">
 								<input class="name" v-model="profile.name" v-on:keyup.enter="setName(profile.name)" placeholder="What do you want to be called?">
 								<input class="bio" v-model="profile.bio" v-on:keyup.enter="setBio(profile.bio)" placeholder="What would you say about yourself?">
+								<input class="picture" v-model="profile.pictureHash" v-on:keyup.enter="setPicture(profile.pictureHash)" placeholder="Profile Picture IPFS Hash">
 							</span>
 							<span v-else>
 								<h5 class="address">
-									<a href="#" v-on:click="changeProfile(post.userId)">
-										{{profile.userId}}
+									<a href="#" v-on:click="changeProfile(profile.userId)" v-html="addressColors(profile.userId)">
 									</a>
 								</h5>
 								<h3>{{profile.name}}</h3>
@@ -52,8 +54,7 @@
 
 							<div class="post" v-for="post in profile.posts">
 								<h5 class="address">
-									<a href="#" v-on:click="changeProfile(post.userId)">
-										{{post.userId}}
+									<a href="#" v-on:click="changeProfile(post.userId)" v-html="addressColors(post.userId)">
 									</a>
 								</h5>
 
@@ -62,8 +63,7 @@
 								<section class="comments">
 									<div class="comment" v-for="comment in post.comments">
 										<h5 class="address">
-											<a href="#" v-on:click="changeProfile(comment.userId)">
-												{{comment.userId}}
+											<a href="#" v-on:click="changeProfile(comment.userId)" v-html="addressColors(comment.userId)">
 											</a>
 										</h5>
 

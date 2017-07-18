@@ -445,13 +445,17 @@ nav * {
   padding: 1.5rem;
   border-radius: 0.2rem;
 }
+#app #profile section.info img.picture {
+  width: 12rem;
+  height: 12rem;
+}
 #app #profile section.posts .post {
   margin-top: 2rem;
   padding: 1.5rem;
   border-radius: 0.2rem;
 }
 #app #profile section.posts .post > .content {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 #app #profile section.posts .post section.comments {
   margin-left: 2rem;

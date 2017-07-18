@@ -15,6 +15,7 @@ contract Account {
 
     string name;
     string bio;
+    bytes picture;
     Post[] posts;
     address owner;
     address[] follows;
@@ -43,6 +44,14 @@ contract Account {
 
     function getBio() constant returns (string) {
         return bio;
+    }
+
+    function setPicture(bytes _picture) isOwner {
+        picture = _picture;
+    }
+
+    function getPicture() constant returns (bytes) {
+        return picture;
     }
 
     function pushPost(string content) isOwner {
@@ -105,6 +114,10 @@ contract Account {
 
     function pushFollow(address account) isOwner {
         follows.push(account);
+    }
+
+    function getFollow(uint id) constant returns (address) {
+        return follows[id];
     }
 
     function deleteFollow(uint id) isOwner {
