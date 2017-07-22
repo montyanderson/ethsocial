@@ -13524,40 +13524,63 @@ class User {
 	}
 
 	static async load(userId) {
+		const startTime = Date.now();
+
 		if(userId.startsWith("0x") == false) {
 			userId = "0x" + userId;
 		}
 
 		const account = Account.at(userId);
 
-		const [ name, bio, pictureHashRaw ] = await Promise.all([
+		const [
+			name,
+			bio,
+			pictureHashRaw,
+			totalPosts,
+			totalFollows
+		] = await Promise.all([
 			account.getName(),
 			account.getBio(),
-			account.getPicture()
+			account.getPicture(),
+			account.getPosts(),
+			account.getFollows()
 		]);
 
 		const pictureHash = base58.encode(pictureHashRaw);
 		const pictureUrl = `https://ipfs.io/ipfs/${pictureHash}`;
 
-		const totalPosts = await account.getPosts();
-
-		const posts = await pForMap(
-			0,
-			i => i < totalPosts,
-			i => ++i,
-			async i => Post.load(userId, i)
-		);
+		const [
+			posts,
+			follows
+		] = await Promise.all([
+			await pForMap(
+				0,
+				i => i < totalPosts,
+				i => ++i,
+				async i => Post.load(userId, i)
+			),
+			await pForMap(
+				0,
+				i => i < totalFollows,
+				async i => account.getFollow(i)
+			)
+		]);
 
 		posts.reverse();
 
-		return new User({
+		const user = new User({
 			userId,
 			name,
 			bio,
 			pictureHash,
 			pictureUrl,
-			posts
+			posts,
+			follows
 		});
+
+		console.log(`User ${JSON.stringify(userId)} loaded in ${(Date.now() - startTime) / 1000}s`, user);
+
+		return user;
 	}
 };
 
@@ -13589,6 +13612,7 @@ const app = window.app = new Vue({
 	data: {
 		userId: localStorage.address,
 		login: localStorage.address ? true : false,
+		user: {},
 		profile: {},
 		newPost: "",
 		editingName: false,
@@ -13604,30 +13628,35 @@ const app = window.app = new Vue({
 			createNotification("Your account is being created!");
 
 			const res = await Account.new();
-			localStorage.address = this.userId = res.contractAddress;
+			localStorage.address = this.user.userId = res.contractAddress;
 			this.login = true;
 
+			await this.updateUser();
 			await this.changeProfile(res.contractAddress);
 
 			createNotification("Your account is ready!");
 		},
 
+		async updateUser() {
+			this.user = await User.load(this.user.userId);
+		},
+
 		async setName(name) {
-			await Account.at(this.userId).setName(name);
+			await Account.at(this.user.userId).setName(name);
 			this.editingName = false;
-			await this.changeProfile(this.userId);
+			await this.changeProfile(this.user.userId);
 		},
 
 		async setBio(bio) {
-			await Account.at(this.userId).setBio(bio);
+			await Account.at(this.user.userId).setBio(bio);
 			this.editingBio = false;
-			await this.changeProfile(this.userId);
+			await this.changeProfile(this.user.userId);
 		},
 
 		async setPicture(pictureHash) {
-			await Account.at(this.userId).setPicture(base58.decode(pictureHash));
+			await Account.at(this.user.userId).setPicture(base58.decode(pictureHash));
 			this.editingPicture = false;
-			await this.changeProfile(this.userId);
+			await this.changeProfile(this.user.userId);
 		},
 
 		async changeProfile(userId) {
@@ -13639,7 +13668,7 @@ const app = window.app = new Vue({
 				post.newComment = (app.profile.posts && app.profile.posts[profile.posts.indexOf(post)] || {}).newComment || "";
 			}
 
-			if(profile.userId == this.userId) {
+			if(profile.userId == this.user.userId) {
 				if(!this.newName) this.newName = profile.name;
 				if(!this.newBio) this.nameBio = profile.bio;
 			}
@@ -13648,8 +13677,8 @@ const app = window.app = new Vue({
 		},
 
 		async submitPost(post) {
-			await Account.at(this.userId).pushPost(post);
-			await this.changeProfile(this.userId);
+			await Account.at(this.user.userId).pushPost(post);
+			await this.changeProfile(this.user.userId);
 		},
 
 		async submitComment(userId, postId, comment) {
@@ -13657,6 +13686,10 @@ const app = window.app = new Vue({
 
 			await user.pushComment(userId, postId, comment);
 			await this.changeProfile(this.profile.userId);
+		},
+
+		async follow(userId) {
+			await Account.at(this.user.userId).pushFollow(userId);
 		},
 
 		addressColors(address = "") {
@@ -13690,6 +13723,8 @@ if(app.login) {
 		if(app.profile.userId) {
 			await app.changeProfile(app.profile.userId);
 		}
+
+
 	}
 
 })();

@@ -26,6 +26,11 @@
 
 					<div class="panel">
 						<h3><a href="#" v-on:click="changeProfile(userId)">My Account</a></h3>
+						<ul>
+							<li v-for="address in user.follows">
+								{{address}}
+							</li>
+						</ul>
 					</div>
 
 					<div id="profile">
@@ -52,6 +57,7 @@
 							</h5>
 
 							<span v-if="profile.userId == userId">
+								<a href="#" v-on:click="follow(profile.userId)">Follow</a>
 								<h3 v-if="!editingName && profile.name" v-on:click="editingName = true">{{profile.name}}</h3>
 
 								<input
@@ -74,6 +80,7 @@
 								>
 							</span>
 							<span v-else>
+								<a href="#" v-on:click="follow(profile.userId)">Follow</a>
 								<h3>{{profile.name}}</h3>
 								<h4>{{profile.bio}}</h4>
 							</span>

@@ -398,7 +398,6 @@ html {
 }
 body {
   font-family: "Maven Pro";
-  color: #555;
   font-weight: 400;
   line-height: 1.4;
 }
@@ -487,6 +486,7 @@ nav * {
 }
 a {
   color: inherit;
+  color: #333;
   text-decoration: inherit;
 }
 h1 {
